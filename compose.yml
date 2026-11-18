@@ -1,0 +1,31 @@
+name: taskflow
+
+services:
+  mongo:
+    image: mongo:7.0
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    # Port non exposé par défaut (sécurité). Décommenter pour se connecter avec Compass :
+    # ports:
+    #   - "27017:27017"
+
+  app:
+    build: .
+    restart: unless-stopped
+    # Toute la configuration (dont la chaîne de connexion MongoDB) est dans .env
+    env_file: .env
+    ports:
+      - "${APP_PORT:-3000}:${PORT:-3000}"
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+volumes:
+  mongo-data:

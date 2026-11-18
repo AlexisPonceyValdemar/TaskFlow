@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TaskFlow</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234f46e5'/><path d='M8 10h4v12H8zM14 10h4v8h-4zM20 10h4v5h-4z' fill='white'/></svg>" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <!-- ===== Écran d'authentification ===== -->
+  <section id="auth-view" class="auth hidden">
+    <div class="auth-card">
+      <div class="brand big"><span class="logo"></span>TaskFlow</div>
+      <p class="muted">La gestion de projet en équipe, simplement.</p>
+      <div class="tabs">
+        <button class="tab active" data-tab="login">Connexion</button>
+        <button class="tab" data-tab="register">Créer une entreprise</button>
+      </div>
+      <form id="login-form" class="stack">
+        <label>E-mail<input name="email" type="email" required autocomplete="email" /></label>
+        <label>Mot de passe
+          <input name="password" type="password" required autocomplete="current-password" />
+        </label>
+        <div class="pwd-feedback" id="login-pwd-feedback"></div>
+        <button class="btn primary" type="submit">Se connecter</button>
+        <p class="hint">Démo : <code>alice@acme.test</code> / <code>TaskFlow2026!</code></p>
+      </form>
+      <form id="register-form" class="stack hidden">
+        <label>Nom de l'entreprise<input name="companyName" required /></label>
+        <label>Votre nom<input name="name" required autocomplete="name" /></label>
+        <label>E-mail<input name="email" type="email" required autocomplete="email" /></label>
+        <label>Mot de passe (12 caractères min.)
+          <input name="password" type="password" minlength="12" required autocomplete="new-password" />
+        </label>
+        <div class="pwd-feedback" id="register-pwd-feedback"></div>
+        <button class="btn primary" type="submit">Créer mon espace</button>
+      </form>
+      <p id="auth-error" class="error"></p>
+    </div>
+  </section>
+
+  <!-- ===== Application ===== -->
+  <section id="app-view" class="layout hidden">
+    <aside class="sidebar">
+      <div class="brand"><span class="logo"></span>TaskFlow</div>
+      <div class="company-name" id="company-name"></div>
+      <nav class="nav">
+        <a href="#/dashboard" data-nav="dashboard">📊 Tableau de bord</a>
+        <a href="#/mine" data-nav="mine">✅ Mes tâches</a>
+        <a href="#/team" data-nav="team">👥 Équipe</a>
+        <a href="#/company" data-nav="company" class="admin-only">🏢 Entreprise</a>
+      </nav>
+      <div class="side-title">
+        <span>Projets</span>
+        <button class="icon-btn admin-only" id="new-project-btn" title="Nouveau projet">＋</button>
+      </div>
+      <nav class="nav" id="project-nav"></nav>
+      <div class="side-footer">
+        <div class="me" id="me"></div>
+        <button class="btn ghost small" id="logout-btn">Déconnexion</button>
+      </div>
+    </aside>
+    <main id="main" class="main"></main>
+  </section>
+
+  <div id="modal-root"></div>
+  <div id="toast" class="toast"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
