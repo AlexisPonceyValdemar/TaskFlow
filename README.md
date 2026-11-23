@@ -1,5 +1,7 @@
 # TaskFlow — Gestion de projet SaaS multi-entreprises
 
+**Auteurs** : PONCEY VALDEMAR Alexis et SUEUR Mathieu — groupe DEV 2.2
+
 Outil de gestion de projet inspiré de Trello / Notion / ClickUp : entreprises, utilisateurs, projets, tâches et tableau **Kanban** avec glisser-déposer. Chaque entreprise est strictement isolée des autres.
 
 **Stack** : Node.js 22 · Express · Mongoose · MongoDB 7 · front-end HTML/CSS/JS sans framework · Docker Compose.
