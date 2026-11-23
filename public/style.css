@@ -138,6 +138,12 @@ th { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: upp
 .list-item:last-child { border-bottom: none; }
 .activity { font-size: 13px; padding: 7px 0; border-bottom: 1px solid var(--border); }
 .activity time { color: var(--muted); font-size: 11px; display: block; }
+.activity time .dot { display: inline-block; width: 7px; height: 7px; margin: 0 4px 0 2px; vertical-align: middle; }
+.act-tabs { display: flex; gap: 6px; overflow-x: auto; margin: 10px 0 6px; padding-bottom: 4px; }
+.act-tab { display: inline-flex; align-items: center; gap: 6px; flex: none; border: 1px solid var(--border); background: transparent;
+  padding: 5px 12px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.act-tab:hover { color: var(--text); }
+.act-tab.active { background: var(--panel); color: var(--text); border-color: var(--text); }
 
 /* ---------- Modal ---------- */
 .overlay { position: fixed; inset: 0; background: rgba(10, 12, 20, .45); display: grid; place-items: center; padding: 16px; z-index: 50; }
