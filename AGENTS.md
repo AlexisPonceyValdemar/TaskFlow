@@ -49,7 +49,9 @@ Le modèle retenu est : **base partagée, collections partagées, discriminant `
   * 1 chiffre `[0-9]`
   * 1 caractère spécial `[^A-Za-z0-9]`
 * **Validation backend** : Centralisée dans `validatePassword` ([src/routes/auth.js](file:///c:/Users/Alexis/taskflow/src/routes/auth.js)) avec retour d'erreurs 400 détaillant les critères manquants.
-* **Feedback visuel frontend** : Jauge de force et checklist dynamique en direct lors de la frappe et dès le focus via `setupPasswordMeter` ([public/app.js](file:///c:/Users/Alexis/taskflow/public/app.js)), actif sur la connexion, l'inscription et la gestion d'équipe.
+* **Feedback visuel frontend** : Jauge de force et checklist dynamique en direct lors de la frappe et dès le focus via `setupPasswordMeter` ([public/app.js](file:///c:/Users/Alexis/taskflow/public/app.js)), actif sur la connexion, l'inscription, la gestion d'équipe et le profil personnel.
+* **Toggle visibilité mot de passe** : Bouton œil interactif avec icônes SVG standardisées (Lucide/Feather) via `setupPasswordToggle` ([public/app.js](file:///c:/Users/Alexis/taskflow/public/app.js)), intégré sur l'ensemble des champs de mot de passe (connexion, inscription, équipe, profil).
+* **Self-service profil utilisateur** : Tout membre (quel que soit son rôle) peut consulter et modifier son profil ainsi que renouveler son mot de passe en libre-service via la modale `openProfileModal` accessible au clic sur sa carte utilisateur dans la barre latérale (`#me`).
 * **Mots de passe en base** : Toujours hachés avec `bcrypt` (facteur de coût 10). Le champ `passwordHash` est défini avec `select: false` pour ne jamais être exposé accidentellement via les retours JSON.
 
 ---

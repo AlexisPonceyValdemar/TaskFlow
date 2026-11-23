@@ -137,6 +137,43 @@
     update(false);
   }
 
+  const EYE_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>`;
+  const EYE_OFF_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 2 20 20"/><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/></svg>`;
+
+  function setupPasswordToggle(inputEl) {
+    if (!inputEl || inputEl.dataset.hasToggle) return;
+    inputEl.dataset.hasToggle = 'true';
+
+    let wrap = inputEl.parentElement;
+    if (!wrap.classList.contains('pwd-input-wrap')) {
+      wrap = document.createElement('div');
+      wrap.className = 'pwd-input-wrap';
+      inputEl.parentNode.insertBefore(wrap, inputEl);
+      wrap.appendChild(inputEl);
+    }
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pwd-toggle-btn';
+    btn.tabIndex = -1;
+    btn.title = 'Afficher le mot de passe';
+    btn.setAttribute('aria-label', 'Afficher le mot de passe');
+    btn.innerHTML = EYE_OFF_ICON;
+
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const isPwd = inputEl.type === 'password';
+      inputEl.type = isPwd ? 'text' : 'password';
+      btn.innerHTML = isPwd ? EYE_ICON : EYE_OFF_ICON;
+      const label = isPwd ? 'Masquer le mot de passe' : 'Afficher le mot de passe';
+      btn.title = label;
+      btn.setAttribute('aria-label', label);
+      inputEl.focus();
+    });
+
+    wrap.appendChild(btn);
+  }
+
   // ---------------------------------------------------------------- temps réel (WebSockets)
   let socket = null;
   let wsRetryTimer = null;
@@ -231,9 +268,12 @@
       } catch (err) { $('#auth-error').textContent = err.message; }
     });
   }
+  setupPasswordToggle($('#login-form input[name="password"]'));
+  setupPasswordToggle($('#register-form input[name="password"]'));
   setupPasswordMeter($('#login-form input[name="password"]'), $('#login-pwd-feedback'));
   setupPasswordMeter($('#register-form input[name="password"]'), $('#register-pwd-feedback'));
   $('#logout-btn').addEventListener('click', logout);
+  $('#me').addEventListener('click', () => openProfileModal());
   $('#new-project-btn').addEventListener('click', () => openProjectModal());
 
   // ---------------------------------------------------------------- shell
@@ -242,7 +282,8 @@
   }
   function renderShell() {
     $('#company-name').textContent = state.company?.name || '';
-    $('#me').innerHTML = `${avatar(state.user)}<span>${esc(state.user.name)}<br><small class="muted">${ROLE[state.user.role]}</small></span>`;
+    $('#me').innerHTML = `${avatar(state.user)}<span>${esc(state.user.name)}<br><small class="muted">${ROLE[state.user.role]} · Mon profil</small></span>`;
+    $('#me').title = 'Voir mon profil et modifier mon mot de passe';
     $$('.admin-only').forEach((el) => el.classList.toggle('hidden', !isAdmin()));
     $('#project-nav').innerHTML = state.projects.length
       ? state.projects.map((p) => `<a href="#/project/${p._id}" data-nav="project/${p._id}"><span class="dot" style="background:${esc(p.color)}"></span>${esc(p.name)}</a>`).join('')
@@ -685,6 +726,7 @@
       </form>`);
     const f = $('#user-form', el);
     f.role.value = user.role;
+    setupPasswordToggle(f.password);
     setupPasswordMeter(f.password, $('#user-pwd-feedback', el));
     f.addEventListener('submit', safe(async (e) => {
       e.preventDefault();
@@ -700,6 +742,75 @@
       if (!confirm(`Supprimer ${user.name} ? Ses tâches seront désassignées.`)) return;
       await api('DELETE', `/users/${user._id}`);
       close(); toast('Membre supprimé'); await loadShared(); renderTeam();
+    }));
+  }
+
+  // ---------------------------------------------------------------- profil utilisateur
+  function openProfileModal() {
+    const u = state.user;
+    const { el, close } = modal(`
+      <div class="modal-head"><h2>Mon profil</h2><span class="spacer"></span><button class="icon-btn" data-close>✕</button></div>
+      <form class="stack" id="profile-form">
+        <div class="row" style="gap:12px;padding:6px 0 10px;border-bottom:1px solid var(--border)">
+          ${avatar(u, 40)}
+          <div style="min-width:0;flex:1">
+            <div style="font-weight:700;font-size:15px">${esc(u.name)} <span class="role ${u.role}">${ROLE[u.role]}</span></div>
+            <div class="muted" style="font-size:12px">${esc(u.email)} · ${esc(state.company?.name || '')}</div>
+          </div>
+        </div>
+        <div class="grid2">
+          <label>Nom complet<input name="name" required value="${esc(u.name)}" /></label>
+          <label>Poste / Fonction<input name="jobTitle" value="${esc(u.jobTitle || '')}" placeholder="ex. Développeur Full-Stack" /></label>
+        </div>
+
+        <div style="margin-top:4px;padding-top:10px;border-top:1px solid var(--border)">
+          <div style="font-weight:600;font-size:13px;margin-bottom:2px">Modifier mon mot de passe</div>
+          <div class="muted" style="font-size:12px;margin-bottom:10px">Laissez vide si vous ne souhaitez pas modifier votre mot de passe.</div>
+          <div class="stack" style="gap:10px">
+            <label>Mot de passe actuel
+              <input name="currentPassword" type="password" autocomplete="current-password" placeholder="Mot de passe actuel" />
+            </label>
+            <label>Nouveau mot de passe (12 carac. min.)
+              <input name="newPassword" type="password" minlength="12" autocomplete="new-password" placeholder="12+ carac., majuscule, chiffre, symbole" />
+            </label>
+            <div class="pwd-feedback" id="profile-pwd-feedback"></div>
+          </div>
+        </div>
+
+        <div class="modal-foot">
+          <button type="button" class="btn" data-close>Annuler</button>
+          <button class="btn primary" type="submit">Enregistrer les modifications</button>
+        </div>
+      </form>`);
+
+    const f = $('#profile-form', el);
+    setupPasswordToggle(f.currentPassword);
+    setupPasswordToggle(f.newPassword);
+    setupPasswordMeter(f.newPassword, $('#profile-pwd-feedback', el));
+
+    f.addEventListener('submit', safe(async (e) => {
+      e.preventDefault();
+      const fd = new FormData(f);
+      const name = fd.get('name').trim();
+      const jobTitle = fd.get('jobTitle').trim();
+      const currentPassword = fd.get('currentPassword');
+      const newPassword = fd.get('newPassword');
+
+      const body = { name, jobTitle };
+      if (newPassword) {
+        if (!currentPassword) {
+          throw new Error('Veuillez renseigner votre mot de passe actuel pour définir un nouveau mot de passe');
+        }
+        body.currentPassword = currentPassword;
+        body.newPassword = newPassword;
+      }
+
+      const updated = await api('PUT', '/auth/me', body);
+      state.user = { ...state.user, ...updated };
+      close();
+      toast('Profil mis à jour avec succès');
+      renderShell();
+      if (location.hash === '#/team') renderTeam();
     }));
   }
 
