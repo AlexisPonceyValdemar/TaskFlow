@@ -106,6 +106,9 @@ docker compose down
 # Réinitialisation complète (suppression des données et relance du seed)
 docker compose down -v
 docker compose up -d --build
+
+# Régénération des spécifications au format PDF
+python scripts/generate_pdf.py
 ```
 
 ---

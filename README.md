@@ -145,5 +145,8 @@ curl -s localhost:3000/api/projects -H "Authorization: Bearer $TOKEN"
 │   ├── seed.js            # données de démonstration
 │   └── routes/            # auth, company, users, projects, tasks
 ├── public/                # front-end (index.html, app.js, style.css)
-└── docs/                  # spécifications technique et fonctionnelle
+├── scripts/               # utilitaires (ex. génération des PDF)
+└── docs/                  # spécifications technique et fonctionnelle (Markdown et PDF)
+    ├── SPECIFICATION_FONCTIONNELLE.md / .pdf
+    └── SPECIFICATION_TECHNIQUE.md / .pdf
 ```
