@@ -353,10 +353,33 @@
           ${mine.slice(0, 8).map(taskListItem).join('') || '<div class="empty-state">Rien à faire, profitez-en ☕</div>'}
         </div></div>
       </div>
-      <div class="card"><h2>Activité récente</h2><div style="margin-top:8px">
-        ${activity.map(activityItem).join('') || '<div class="muted">Aucune activité.</div>'}
-      </div></div>`;
+      <div class="card"><h2>Activité récente</h2>
+        <div class="act-tabs" role="tablist">
+          <button class="act-tab active" role="tab" data-act-tab="">Tous les projets</button>
+          ${state.projects.map((p) => `<button class="act-tab" role="tab" data-act-tab="${p._id}">
+            <span class="dot" style="background:${esc(p.color)}"></span>${esc(p.name)}</button>`).join('')}
+        </div>
+        <div id="activity-list">${activityList(activity, true)}</div>
+      </div>`;
     bindTaskListItems(mine);
+    bindActivityTabs(activity);
+  }
+
+  function activityList(items, withProject) {
+    return items.map((a) => activityItem(a, withProject)).join('') || '<div class="muted">Aucune activité.</div>';
+  }
+  function bindActivityTabs(allActivity) {
+    const list = $('#activity-list');
+    let token = 0;
+    $$('[data-act-tab]', main()).forEach((btn) => btn.addEventListener('click', safe(async () => {
+      $$('[data-act-tab]', main()).forEach((b) => b.classList.toggle('active', b === btn));
+      const id = btn.dataset.actTab;
+      if (!id) { list.innerHTML = activityList(allActivity, true); return; }
+      const mine = ++token;
+      list.innerHTML = '<div class="muted">Chargement…</div>';
+      const items = await api('GET', `/projects/${id}/activity`);
+      if (mine === token) list.innerHTML = activityList(items, false);
+    })));
   }
 
   function taskListItem(t) {
@@ -383,12 +406,14 @@
     'project.updated': 'a modifié le projet', 'project.deleted': 'a supprimé le projet', 'user.created': 'a ajouté',
     'user.updated': 'a modifié le profil de', 'user.deleted': 'a supprimé', 'company.updated': "a modifié l'entreprise",
   };
-  function activityItem(a) {
+  function activityItem(a, withProject) {
     const d = a.details || {};
     const target = d.title || d.name || '';
     const move = a.action === 'task.moved' ? ` de <b>${esc(d.from)}</b> vers <b>${esc(d.to)}</b>` : '';
+    const p = withProject && a.projectId ? state.projects.find((x) => x._id === String(a.projectId)) : null;
+    const tag = p ? ` · <span class="dot" style="background:${esc(p.color)}"></span>${esc(p.name)}` : '';
     return `<div class="activity"><b>${esc(a.actorName)}</b> ${ACTIONS[a.action] || esc(a.action)} ${target ? `« ${esc(target)} »` : ''}${move}
-      <time>${fmtDateTime(a.createdAt)}</time></div>`;
+      <time>${fmtDateTime(a.createdAt)}${tag}</time></div>`;
   }
 
   // ---------------------------------------------------------------- mes tâches
@@ -438,7 +463,7 @@
     $('#activity-btn').addEventListener('click', safe(async () => {
       const items = await api('GET', `/projects/${project._id}/activity`);
       modal(`<div class="modal-head"><h2>Activité du projet</h2><span class="spacer"></span><button class="icon-btn" data-close>✕</button></div>
-        ${items.map(activityItem).join('') || '<div class="muted">Aucune activité.</div>'}`);
+        ${activityList(items, false)}`);
     }));
     await loadBoardTasks();
   }
